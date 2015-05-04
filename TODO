@@ -1,0 +1,4 @@
+1. Gruntfile to perform the following tasks
+    - get source and build
+    - start all control modules, including humix controller
+    - 
