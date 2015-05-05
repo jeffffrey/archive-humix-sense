@@ -1,3 +1,9 @@
 [submodule "controls/humix-sense-eye"]
 	path = controls/humix-sense-eye
 	url = https://github.com/project-humix/humix-sense-eye.git
+[submodule "controls/humix-sense-temp"]
+	path = controls/humix-sense-temp
+	url = https://github.com/project-humix/humix-sense-temp.git
+[submodule "controls/humix-sense-bright"]
+	path = controls/humix-sense-bright
+	url = https://github.com/project-humix/humix-sense-bright.git
