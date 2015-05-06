@@ -15,8 +15,10 @@ function init(){
     // init mqtt-based IoT client
     setupClient();
 
-    setupClientEvents();
+    setupControlEvents();
 
+    setupControlCommands();
+    
     nats.publish("humix.sense.controller.status","start");
 
 
@@ -54,7 +56,28 @@ function setupClient(){
     
 };
 
-function setupClientEvents(){
+function setupControlCommands(){
+
+    iot_client.subscribe('iot-2/cmd/+/fmt/+', function(err, granted){
+
+        console.log('subscribed command, granted: '+ JSON.stringify(granted));
+        
+    });
+
+    iot_client.on("message", function(topic,payload){
+
+        console.log('received topic'+topic+', payload:'+payload);
+
+        if(topic.indexOf('humix-sense-eye-control')){
+            console.log('adjust eye with msg:'+payload);
+            nats.publish('humix.sense.eye.control', JSON.stringify(payload));
+        }
+    });
+    
+    
+}
+
+function setupControlEvents(){
 
     nats.subscribe('humix.sense.controller.command', function(msg) {
 
@@ -86,6 +109,9 @@ function setupClientEvents(){
         
         iot_client.publish('iot-2/evt/humix-sense-temp-event/fmt/json', JSON.stringify(msg), function() {
             console.log('published temp event data to IoT foundation');
+
+           
+            
         });
         
     });
