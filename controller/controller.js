@@ -70,8 +70,15 @@ function setupControlCommands(){
 
         if(topic.indexOf('humix-sense-eye-control')){
             console.log('adjust eye with msg:'+payload);
-            nats.publish('humix.sense.eye.control', JSON.stringify(payload));
+            nats.publish('humix.sense.eye.command', JSON.stringify(payload));
         }
+
+        
+        if(topic.indexOf('humix-sense-speech-control')){
+        //    console.log('adjust eye with msg:'+payload);
+            nats.publish('humix.sense.speech.command', JSON.stringify(payload));
+        }
+
     });
     
     
