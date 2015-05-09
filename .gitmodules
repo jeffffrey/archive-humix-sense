@@ -7,3 +7,6 @@
 [submodule "controls/humix-sense-bright"]
 	path = controls/humix-sense-bright
 	url = https://github.com/project-humix/humix-sense-bright.git
+[submodule "controls/humix-sense-speech"]
+	path = controls/humix-sense-speech
+	url = https://github.com/project-humix/humix-sense-speech.git
