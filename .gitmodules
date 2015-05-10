@@ -16,3 +16,6 @@
 [submodule "controls/humix-sense-blinking"]
 	path = controls/humix-sense-blinking
 	url = https://github.com/project-humix/humix-sense-blinking.git
+[submodule "controls/humix-sense-hands"]
+	path = controls/humix-sense-hands
+	url = https://github.com/project-humix/humix-sense-hands.git
