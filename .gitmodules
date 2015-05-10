@@ -13,9 +13,6 @@
 [submodule "controls/humix-sense-cam"]
 	path = controls/humix-sense-cam
 	url = https://github.com/project-humix/humix-sense-cam.git
-[submodule "humix-sense-hands"]
-	path = humix-sense-hands
-	url = https://github.com/project-humix/humix-sense-hands.git
 [submodule "controls/humix-sense-hands"]
 	path = controls/humix-sense-hands
 	url = https://github.com/project-humix/humix-sense-hands.git
