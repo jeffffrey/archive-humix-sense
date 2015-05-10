@@ -1,6 +1,6 @@
 #!/bin/bash
 
-export WORKDIR=/home/liuch/workspace/humix/humix-sense/
+export WORKDIR=`pwd`
 
 
 cd $WORKDIR/bin
