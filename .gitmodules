@@ -10,3 +10,15 @@
 [submodule "controls/humix-sense-speech"]
 	path = controls/humix-sense-speech
 	url = https://github.com/project-humix/humix-sense-speech.git
+[submodule "controls/humix-sense-cam"]
+	path = controls/humix-sense-cam
+	url = https://github.com/project-humix/humix-sense-cam.git
+[submodule "controls/humix-sense-blinking"]
+	path = controls/humix-sense-blinking
+	url = https://github.com/project-humix/humix-sense-blinking.git
+[submodule "controls/humix-sense-hands"]
+	path = controls/humix-sense-hands
+	url = https://github.com/project-humix/humix-sense-hands.git
+[submodule "controls/humix-sense-nfc"]
+	path = controls/humix-sense-nfc
+	url = https://github.com/project-humix/humix-sense-nfc.git
