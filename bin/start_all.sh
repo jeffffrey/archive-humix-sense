@@ -1,15 +1,18 @@
 #!/bin/bash
 
-#export WORKDIR=`pwd`
+export WORKDIR=`pwd`
 
 #echo $WORKDIR
 
-cd $WORKDIR/bin
-./gnatsd-arm & 
+cd $WORKDIR
+./bin/gnatsd-arm & 
 
-cd $WORKDIR/controller
-node controller.js &
+/usr/local/bin/node-11 $WORKDIR/controller/controller.js &
 
-cd $WORKDIR/controls/humix-sense-speech/
-node TTS.js &
+/usr/local/bin/node-11 $WORKDIR/controls/humix-sense-speech/TTS.js &
+
+/usr/local/bin/node-10 $WORKDIR/controls/humix-sense-eye/eye.js &
+
+/usr/local/bin/node-11 $WORKDIR/controls/humix-sense-blinking/start.js &
+
 
