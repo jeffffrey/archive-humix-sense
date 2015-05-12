@@ -18,19 +18,10 @@ describe("Scenario1: Wake up by NFC. ", function(){
 
         });
 
-
         it("should send a wake up command", function(){
-            this.timeout(10000);
-            nats.publish("humix.sense.eye.command", '{"action":"wakeup"}');
+
+            
         })
-
-     /* 
-        it("should send excited command", function(){
-
-            nats.publish("humix.sense.eye.command", '{"feel":-100}');
-        })
-*/
-
     })
 
     

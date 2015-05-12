@@ -1,10 +1,11 @@
 #!/bin/bash
 
-export WORKDIR=`pwd`
+#export WORKDIR=`pwd`
 
+#echo $WORKDIR
 
 cd $WORKDIR/bin
-./gnatsd-arm &
+./gnatsd-arm & 
 
 cd $WORKDIR/controller
 node controller.js &

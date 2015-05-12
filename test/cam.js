@@ -1,7 +1,7 @@
 var nats = require('nats').connect();
 var should = require('should');
 
-describe("Scenario3-2: Age Analyzer ", function(){
+describe("Scenario 5 : How old am I.  ", function(){
 
     describe("After received a cam command from Humix Think", function(){
 
@@ -15,6 +15,7 @@ describe("Scenario3-2: Age Analyzer ", function(){
 
                 var data = JSON.parse(dataStr);
                 data.should.have.property('image');
+                console.log(dataStr);
                 nats.unsubscribe(sid);
                 done();
             })

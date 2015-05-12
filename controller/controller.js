@@ -2,6 +2,8 @@ var mqtt = require('mqtt');
 var nats = require('nats').connect();
 var log = require('logule').init(module, 'controller');
 
+var request = require('request');
+
 var iot_client;
 
 
@@ -38,7 +40,7 @@ function init(){
 
     setupControlEvents();
 
-//    setupControlCommands();
+    setupControlCommands();
     
     nats.publish("humix.sense.controller.status","start");
 
@@ -90,20 +92,21 @@ function setupControlCommands(){
         log.info('received topic'+topic+', payload:'+payload);
 
         var command = JSON.parse(payload);
-        if(topic.indexOf('humix-sense-eye-command')){
+        if(topic.indexOf('humix-sense-eye-command') != -1){
 
             if(command.feel){
                 log.info('adjust eye with feel:'+feel);
-                nats.publish('humix.sense.eye.command', feel);
+                nats.publish('humix.sense.eye.command', JSON.stringify(command));
             }
             
-        }else if(topic.indexOf('humix-sense-speech-command')){
+        }else if(topic.indexOf('humix-sense-speech-command') != -1 ){
 
             log.debug('say:'+payload);
-            nats.publish('humix.sense.speech.command', payload);
+            nats.publish('humix.sense.speech.command', JSON.stringify(command));
 
-        }else if(topic.indexOf('humix-sense-cam-command')){
-            nats.publish('humix.sense.cam.command', payload);
+        }else if(topic.indexOf('humix-sense-cam-command') != -1){
+            log.info("taking picture");
+            nats.publish('humix.sense.cam.command', JSON.stringify(command));
         }
 
         
@@ -226,7 +229,6 @@ function setupControlEvents(){
                 log.info("WAKING UP");
                 state = HUMIX_STATE.NORMAL;
 
-
                 nats.publish('humix.sense.eye.command', '{"action":"wakeup"}');
                 nats.publish('humix.sense.eyelid.command','{"action":"open"}');
             }
@@ -234,9 +236,6 @@ function setupControlEvents(){
 
             if(data.id === "showgirl"){
                 log.info("GETTING Excited");
-                nats.publish('humix.sense.eye.command', '{"action":"wakeup"}');
-                state = HUMIX_STATE.NORMAL;
-
 
                 nats.publish('humix.sense.eye.command', '{"feel":"excited"}');
             }
@@ -253,9 +252,39 @@ function setupControlEvents(){
 
         log.info('[EVENT][CAM]');
 
-        iot_client.publish('iot-2/evt/humix-sense-cam-event/fmt/json', JSON.stringify(msg), function() {
+        /*
+        iot_client.publish('iot-2/evt/humix-sense-cam-event/fmt/json', msg, function() {      
+//        iot_client.publish('iot-2/evt/humix-sense-cam-event/fmt/json', JSON.stringify(msg), function() {
             console.log('published voice event data to IoT foundation');
         });
+        */
+
+        //console.log('msg:'+msg);
+        var url = "http://humix-think.mybluemix.net/face";
+
+        request.post({
+            url: url,
+            body: msg,
+            headers: {
+
+                "Content-Type" : "application/json"
+            }
+                
+        }, function (error, response, body) {
+            if (!error && response.statusCode === 200) {
+                console.log(body)
+                        
+            }
+            else {
+
+                console.log("error: " + error)
+                console.log("response.statusCode: " + response.statusCode)
+                console.log("response.statusText: " + response.statusText)
+                        
+            }
+                
+        })
+
         
         // TODO publish picture to nodered
         //nats.publish('humix.sense.speech.command','{"age":18}');

@@ -19,3 +19,6 @@
 [submodule "controls/humix-sense-hands"]
 	path = controls/humix-sense-hands
 	url = https://github.com/project-humix/humix-sense-hands.git
+[submodule "controls/humix-sense-nfc"]
+	path = controls/humix-sense-nfc
+	url = https://github.com/project-humix/humix-sense-nfc.git
