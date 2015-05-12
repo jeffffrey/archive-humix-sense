@@ -95,7 +95,7 @@ function setupControlCommands(){
         if(topic.indexOf('humix-sense-eye-command') != -1){
 
             if(command.feel){
-                log.info('adjust eye with feel:'+feel);
+               // log.info('adjust eye with feel:'+feel);
                 nats.publish('humix.sense.eye.command', JSON.stringify(command));
             }
             
@@ -107,6 +107,10 @@ function setupControlCommands(){
         }else if(topic.indexOf('humix-sense-cam-command') != -1){
             log.info("taking picture");
             nats.publish('humix.sense.cam.command', JSON.stringify(command));
+
+        }else if(topic.indexOf('humix-sense-eyelid-command') != -1){
+            log.info("eyelid command");
+            nats.publish('humix.sense.eyelid.command',JSON.stringify(command));            
         }
 
         
