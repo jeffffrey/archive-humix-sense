@@ -2,3 +2,4 @@
     - get source and build
     - start all control modules, including humix controller
     - 
+2. Fix log module in humix-sense-speech
