@@ -1,6 +1,4 @@
 
-
-
 var jeffrey_humix_config = {
     "org" : "vlqpzn",
     "type" : "jeffrey-humix",

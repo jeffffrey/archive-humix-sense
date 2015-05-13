@@ -9,4 +9,4 @@ setInterval(function(){
     nats.publish('humix.sense.humid.event','{"humid":50}');
     nats.publish('humix.sense.brightness.event','{"brightness":620}');
     
-},3000);
+},10000);

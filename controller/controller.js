@@ -94,10 +94,11 @@ function setupControlCommands(){
         var command = JSON.parse(payload);
         if(topic.indexOf('humix-sense-eye-command') != -1){
 
-            if(command.feel){
+            if(command.feel || command.action){
                // log.info('adjust eye with feel:'+feel);
                 nats.publish('humix.sense.eye.command', JSON.stringify(command));
             }
+
             
         }else if(topic.indexOf('humix-sense-speech-command') != -1 ){
 
@@ -155,7 +156,7 @@ function setupControlEvents(){
 
         log.info('[EVENT][TEMP]:'+ msg);
         
-        iot_client.publish('iot-2/evt/humix-sense-temp-event/fmt/json', JSON.stringify(msg), function() {
+        iot_client.publish('iot-2/evt/humix-sense-temp-event/fmt/json', msg, function() {
             log.debug('published temp event data to IoT foundation');
             
         });
