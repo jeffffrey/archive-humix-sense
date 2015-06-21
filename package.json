@@ -12,6 +12,7 @@
     "nats": "^0.2.9",
     "request": "^2.55.0",
     "should": "^6.0.1",
-    "soap": "latest"
+    "soap": "latest",
+    "nodemon": "^1.3.7"
   }
 }

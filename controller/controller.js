@@ -1,21 +1,33 @@
+// Event delivery with MQTT
 var mqtt = require('mqtt');
+
+// NATS for local message bus
 var nats = require('nats').connect();
-var log = require('logule').init(module, 'controller');
+
 
 var request = require('request');
+var log = require('logule').init(module, 'controller');
+
+
+var config = require('./config.js');
+
 
 var iot_client;
 
+// CONSTANTS
+var HEALTH_CHECK_INTERVAL = 5000; // 5 second
+var BRIGHTNESS_THRESHOLD = 100;
 
-var health_check_interval = 5; // 5 second
-var BRIGHTNESS_THRESHOLD = 300;
+
+// HUMIX SENSE STATES
 
 var HUMIX_STATE = {
     SLEEP   : 1,
     NORMAL  : 2,
     EXCITED : 3,
     HAPPY   : 4,
-    SAD     : 5
+    SAD     : 5,
+    HRM_MODE: 6
 } 
 
 var HUMIX_EYELID_STATE = {
@@ -25,26 +37,57 @@ var HUMIX_EYELID_STATE = {
     
 }
 
-// TODO
-var HUMIX_EYE_STATE;
-
-
+var eyelid_state = HUMIX_EYELID_STATE.CLOSED;
 var state = HUMIX_STATE.SLEEP;
+
+
 
 function init(){
 
-    log.info("Starting up..");
-        
-    // init mqtt-based IoT client
+    log.info("Initialize Humix Sense");
+
+    // setup communitcation channel with IoT Foundation
     setupClient();
 
+    // process out going events
     setupControlEvents();
 
+    // process incoming commands
     setupControlCommands();
+
+
     
     nats.publish("humix.sense.controller.status","start");
 
 
+    setInterval(function(){
+
+        log.info("Publish Humix Module Status");
+
+
+        var sensor_status = {
+
+            'humix.sense.controller.status' : state === HUMIX_STATE.SLEEP ? "sleep" : "wakeup",
+            'humix.sense.cam.status'     : 'on',
+            'humix.sense.temp.status'    : 'on',
+            'humix.sense.humix.status'   : 'on',
+            'humix.sense.light.status'   : 'on',
+            'humix.sense.nfc.status'     : 'on',
+            'humix.sense.speech.status'   : 'on',
+            'humix.sense.eye.status'   : 'on',
+            'humix.sense.hrm.status'   : 'on'
+            
+        }
+
+
+        if(iot_client){
+                    
+            iot_client.publish('iot-2/evt/humix-sense-controller-status/fmt/json', JSON.stringify(sensor_status) , function() {
+                log.info('published control data to IoT foundation');
+            });
+
+        }        
+    },HEALTH_CHECK_INTERVAL);
     // start health check process
 }
 
@@ -54,7 +97,6 @@ function setupClient(){
 
     // load IoT Foundation config
 
-    var config = require('./config.js');
 
     log.info("config:"+JSON.stringify(config));
 
@@ -112,6 +154,16 @@ function setupControlCommands(){
         }else if(topic.indexOf('humix-sense-eyelid-command') != -1){
             log.info("eyelid command");
             nats.publish('humix.sense.eyelid.command',JSON.stringify(command));            
+
+        }else if(topic.indexOf('humix-sense-controller-status') != -1){
+
+            log.info("Query for Humix sense status");
+
+            queryHealthStatus(function(err, data){
+
+                
+            });
+            
         }
 
         
@@ -120,35 +172,16 @@ function setupControlCommands(){
     
 }
 
+function queryHealthStatus(callback){
+
+    
+
+    
+}
+
 function setupControlEvents(){
 
-
-    /*
-    nats.subscribe('humix.sense.controller.command', function(msg) {
-
-        switch(msg){
-
-        case 'stop':
-            stop();
-            break;
-
-        default:
-            break;
-        }        
-    });
-
-    nats.subscribe('humix.sense.controller.status', function(msg) {
-
-        if(msg === 'ping')
-            nats.publish('humix.sense.controller.status','pong');
         
-    });
-
-    */
-
-
-    
-    
     // temperature
 
 
@@ -157,12 +190,13 @@ function setupControlEvents(){
         log.info('[EVENT][TEMP]:'+ msg);
         
         iot_client.publish('iot-2/evt/humix-sense-temp-event/fmt/json', msg, function() {
-            log.debug('published temp event data to IoT foundation');
-            
+            log.info('published temp event data to IoT foundation');            
         });
         
     });
-    
+
+
+
     // humid
 
     
@@ -172,7 +206,7 @@ function setupControlEvents(){
         
         
         iot_client.publish('iot-2/evt/humix-sense-humid-event/fmt/json', msg, function() {
-            log.debug('published humid event data to IoT foundation');
+            log.info('published humid event data to IoT foundation');
         });
         
     });
@@ -190,8 +224,19 @@ function setupControlEvents(){
 
         if(data.brightness < BRIGHTNESS_THRESHOLD ){
 
-            nats.publish('humix.sense.eyelid.command', '{"action":"close"}');
+            if(eyelid_state ==  HUMIX_EYELID_STATE.OPEN){
+              log.info("close eye");
+              nats.publish('humix.sense.eyelid.command', '{"action":"close"}');
+              eyelid_state =  HUMIX_EYELID_STATE.CLOSED;
+            }         
+        
+        }else{
 
+           if(eyelid_state ==  HUMIX_EYELID_STATE.CLOSED && state != HUMIX_STATE.SLEEP){
+              log.info("open eye");
+              nats.publish('humix.sense.eyelid.command', '{"action":"open"}');
+              eyelid_state =  HUMIX_EYELID_STATE.OPEN;
+           }
         }
 
         
@@ -225,48 +270,75 @@ function setupControlEvents(){
         log.info('[EVENT][NFC]:' + msg);
 
         var data = JSON.parse(msg);
+        nats.publish('humix.sense.eye.command', '{"heartrate":75}');
         
         // TODO publish to nodered
-
+/*
         if(state === HUMIX_STATE.SLEEP){
 
-            if(data.id === "showgirl"){
-                log.info("WAKING UP");
-                state = HUMIX_STATE.NORMAL;
+          //  if(data.id === "showgirl"){
+            log.info("NFC TRIGGER WAKING UP");
+            state = HUMIX_STATE.NORMAL;
 
-                nats.publish('humix.sense.eye.command', '{"action":"wakeup"}');
-                nats.publish('humix.sense.eyelid.command','{"action":"open"}');
-            }
+            nats.publish('humix.sense.eye.command', '{"action":"wakeup"}');
+            nats.publish('humix.sense.eyelid.command','{"action":"open"}');
+            eyelid_state  =  HUMIX_EYELID_STATE.OPEN;
+           // }
         }else if (state === HUMIX_STATE.NORMAL){
 
-            if(data.id === "showgirl"){
-                log.info("GETTING Excited");
 
-                nats.publish('humix.sense.eye.command', '{"feel":"excited"}');
-            }
+            log.info("NFC TRIGGER HRM MODE");
+            state = HUMIX_STATE.HRM_MODE;
+            //nats.publish('humix.sense.eye.command', '{"action":"sleep"}');
+            //nats.publish('humix.sense.eyelid.command','{"action":"close"}');
+            //eyelid_state =  HUMIX_EYELID_STATE.CLOSED;           
             
+        }else if ( state === HUMIX_STATE.HRM_MODE ){
+           
+            log.info("NFC TRIGGER STATE BACK TO NORMAL");
+            state = HUMIX_STATE.NORMAL;
         }
-        
+  */      
     });
 
 
+    // hrm event
 
+    nats.subscribe('humix.sense.hrm.event', function(msg){
+
+
+        if(state == HUMIX_STATE.HRM_MODE){
+            var data = JSON.parse(msg);
+
+            log.info('[EVENT][HRM], rate:'+data.value);
+            
+            nats.publish('humix.sense.eye.command', '{"heartrate":'+data.value+'}');
+        }
+    });
+
+
+    // speech event
+
+    nats.subscribe('humix.sense.speech.event', function(msg){
+
+        log.info('[EVENT][SPEECH]');
+
+        var command = {'command': msg};
+
+        console.log("command :"+ JSON.stringify(command));
+        iot_client.publish('iot-2/evt/humix-sense-speech-event/fmt/json', JSON.stringify(command), function() {
+            log.info('published speech event data to IoT foundation');
+        });
+        
+    });
+    
     // camera event
 
     nats.subscribe('humix.sense.cam.event', function(msg){
 
         log.info('[EVENT][CAM]');
 
-        /*
-        iot_client.publish('iot-2/evt/humix-sense-cam-event/fmt/json', msg, function() {      
-//        iot_client.publish('iot-2/evt/humix-sense-cam-event/fmt/json', JSON.stringify(msg), function() {
-            console.log('published voice event data to IoT foundation');
-        });
-        */
-
-        //console.log('msg:'+msg);
-        var url = "http://humix-think.mybluemix.net/face";
-
+        var url = config.cam_url;
         request.post({
             url: url,
             body: msg,
