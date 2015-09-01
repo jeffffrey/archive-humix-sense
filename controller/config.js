@@ -1,17 +1,13 @@
 
-var jeffrey_humix_config = {
-    "org" : "vlqpzn",
-    "type" : "jeffrey-humix",
-    "id" : "b827eb26fdcc",
+// Please update the following capitalized attributes with the information you got from IoT foundation
+
+var humix_config = {
+    "org" : "YOUR_ORG",
+    "type" : "DEVICE_TYPE",
+    "id" : "DEVIDE_ID",
     "authMethod" : "token",
-    "authToken" : "P81)B0okaVLJK4z(Ju",
-    "cam_url"   : "http://humix-omega-think.mybluemix.net/face"
+    "authToken" : "ACCESS_TOKEN",
+    "cam_url"   : "HUMIX_THINK_URL"
 };
 
-
-
-var default_humix_config = jeffrey_humix_config;
-
-
-
-module.exports = default_humix_config;
+module.exports = humix_config;
